@@ -25,6 +25,10 @@ and associative Arrays for the root object.
 See http://php.net/serialize and http://php.net/unserialize for
 details on the PHP side of all this.
 
+## Why this fork?
+
+This fork was created to work with other applications that use string length instead of bytesize when serializing strings in PHP. Only use this fork if this applies to your project.
+
 ## Acknowledgements
 
 - TJ Vanderpoel, initial PHP serialized session support.

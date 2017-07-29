@@ -63,6 +63,7 @@ class TestPhpSerialize < Test::Unit::TestCase
 	test(-2147483648, "i:-2147483648;", :name => 'Min Fixnum')
 	test 4.2, 'd:4.2;'
 	test 'test', 's:4:"test";'
+	test 'åäö', 's:3:"åäö";'
 	test :test, 's:4:"test";', :name => 'Symbol'
 	test "\"\n\t\"", "s:4:\"\"\n\t\"\";", :name => 'Complex string'
 	test [nil, true, false, 42, 4.2, 'test'], 'a:6:{i:0;N;i:1;b:1;i:2;b:0;i:3;i:42;i:4;d:4.2;i:5;s:4:"test";}',
@@ -75,7 +76,7 @@ class TestPhpSerialize < Test::Unit::TestCase
 
   # PHP counts multibyte string, not string length
   def test_multibyte_string
-    assert_equal  "s:6:\"öäü\";", PHP.serialize("öäü")
+    assert_equal  "s:3:\"öäü\";", PHP.serialize("öäü")
   end
 	# Verify assoc is passed down calls.
 	# Slightly awkward because hashes don't guarantee order.
