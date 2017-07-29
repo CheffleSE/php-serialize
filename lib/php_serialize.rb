@@ -7,10 +7,14 @@ module PHP
 		# Reads data from the buffer until +char+ is found. The
 		# returned string will include +char+.
 		def read_until(char)
-			val, cpos = '', pos
-			if idx = string.index(char, cpos)
-				val = read(idx - cpos + 1)
+			val = ''
+
+			while next_char = getc
+				val << next_char
+
+				break if next_char == char
 			end
+
 			val
 		end
 	end
@@ -61,7 +65,7 @@ module PHP
 				s << '}'
 
 			when String, Symbol
-				s << "s:#{var.to_s.bytesize}:\"#{var.to_s}\";"
+				s << "s:#{var.to_s.length}:\"#{var.to_s}\";"
 
 			when Fixnum # PHP doesn't have bignums
 				s << "i:#{var};"
@@ -244,8 +248,13 @@ module PHP
 				end
 
 			when 's' # string, s:length:"data";
-				len = string.read_until(':').to_i + 3 # quotes, separator
-				val = string.read(len)[1...-2] # read it, kill useless quotes
+				len = string.read_until(':').to_i
+				string.read(1) # skip quote
+
+				val = ''
+				len.times { val << string.getc }
+
+				string.read(2) # skip quote and semi-colon
 
 			when 'i' # integer, i:123
 				val = string.read_until(';').to_i
