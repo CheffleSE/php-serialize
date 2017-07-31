@@ -15,6 +15,16 @@ module PHP
 
 			val
 		end
+
+		# Returns the next chararacter of the string without moving the cursor.
+		def peek
+			string.bytes[pos].chr
+		end
+
+		# Returns the amount of remaining chars that can be read
+		def remaining_chars
+			string.length - pos
+		end
 	end
 
 	# Returns a string representing the argument in a form PHP.unserialize
@@ -63,7 +73,7 @@ module PHP
 				s << '}'
 
 			when String, Symbol
-				s << "s:#{var.to_s.length}:\"#{var.to_s}\";"
+				s << "s:#{var.to_s.bytesize}:\"#{var.to_s}\";"
 
 			when Fixnum # PHP doesn't have bignums
 				s << "i:#{var};"
@@ -249,10 +259,43 @@ module PHP
 				len = string.read_until(':').to_i
 				string.read(1) # skip quote
 
-				val = ''
-				len.times { val << string.getc }
+				# At this point we don't know if {len} is given in bytes or chars
+				# so we will simply try both and pick the most reasonable.
 
+				byte_val = ''
+				len.times { byte_val << string.read(1) }
+				next_byte = string.peek
+				byte_val = byte_val.force_encoding('UTF-8')
+
+				if string.remaining_chars > 2 * len
+					# If we have enough chars left to parse we rewind
+					# and read each character as a char.
+
+					char_val = ''
+					string.seek(-len, IO::SEEK_CUR)
+					len.times { char_val << string.getc }
+					next_char = string.peek
+				end
+
+				if next_byte == '"' && next_char == '"'
+					# We have either gone too far or too short. We can only overshoot if
+					# the string contains any chars which means that we should interpret
+					# it as bytes. Otherwise we should interpret it as chars.
+
+					use_bytes = byte_val.bytesize > byte_val.length
+				elsif next_byte == '"'
+					# This is a byte-sized string but we need to rewind
+					# one byte for every char in the string we found.
+
+				  use_bytes = true
+				end
+
+				# If we read chars but chose to use bytes we need to compensate for
+				# every byte we read as a char.
+				string.seek(byte_val.length - byte_val.bytesize, IO::SEEK_CUR) if char_val && use_bytes
 				string.read(2) # skip quote and semi-colon
+
+				val = use_bytes ? byte_val : char_val
 
 			when 'i' # integer, i:123
 				val = string.read_until(';').to_i
