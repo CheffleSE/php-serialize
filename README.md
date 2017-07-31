@@ -27,7 +27,7 @@ details on the PHP side of all this.
 
 ## Why this fork?
 
-This fork was created to work with other applications that use string length instead of bytesize when serializing strings in PHP. Only use this fork if this applies to your project.
+This fork was created to work with other applications that uses both PHP5 and PHP6 meaning we must be able to unserialize strings given in either bytesize or charsize. Only use this fork if this applies to your project.
 
 ## Acknowledgements
 
