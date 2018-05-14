@@ -32,7 +32,7 @@ module PHP
 	#
 	#   string = PHP.serialize(mixed var[, bool assoc])
 	#
-	# Array, Hash, Fixnum, Float, True/FalseClass, NilClass, String and Struct
+	# Array, Hash, Integer, Float, True/FalseClass, NilClass, String and Struct
 	# are supported; as are objects which support the to_assoc method, which
 	# returns an array of the form [['attr_name', 'value']..].  Anything else
 	# will raise a TypeError.
@@ -75,7 +75,7 @@ module PHP
 			when String, Symbol
 				s << "s:#{var.to_s.bytesize}:\"#{var.to_s}\";"
 
-			when Fixnum # PHP doesn't have bignums
+			when Integer # PHP doesn't have bignums
 				s << "i:#{var};"
 
 			when Float
@@ -159,7 +159,7 @@ module PHP
 	# each serialized attribute is sent to the new object using the respective
 	# {attribute}=() method; you'll get a NameError if the method doesn't exist.
 	#
-	# Array, Hash, Fixnum, Float, True/FalseClass, NilClass and String should
+	# Array, Hash, Integer, Float, True/FalseClass, NilClass and String should
 	# be returned identically (i.e. foo == PHP.unserialize(PHP.serialize(foo))
 	# for these types); Struct should be too, provided it's in the namespace
 	# Module.const_get within unserialize() can see, or you gave it the same
