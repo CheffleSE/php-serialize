@@ -1,3 +1,6 @@
+## 1.3.3 2018-05-14
+- Ruby 2.4.0 compliance.
+
 ## 1.3.0 2017-07-29
 - Add support for parsing both PHP5 and PHP6 generated objects.
 
